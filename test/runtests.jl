@@ -1,6 +1,8 @@
 using QFT
 using Test
 
-@testset "QFT.jl" begin
-    # Write your tests here.
-end
+include("../src/state.jl")
+include("../src/operator.jl")
+
+# To run the tests in a terminal, type:
+# julia --project=. test/runtests.jl
