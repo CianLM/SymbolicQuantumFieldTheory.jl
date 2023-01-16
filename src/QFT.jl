@@ -17,83 +17,26 @@ using Metatheory
 using Metatheory.Library
 using LaTeXStrings
 using Latexify
-# using LinearAlgebra: I
-# I
-# one(::Type{<:Operator}) = Operator(:I,())
-# one(Operator)
 
+using MacroTools
 
-import TermInterface: istree, exprhead, operation, arguments, similarterm
-
-# using Pkg
-# Pkg.resolve()
+import TermInterface: istree, exprhead, operation, arguments, similarterm, metadata
 
 SymorNum = Union{SymbolicUtils.Symbolic,Number}
+abstract type OperatorSym end
+# abstract type OperatorPowers <: OperatorSym end
+abstract type BraKet end
+abstract type State end
 
-Ket()
-Ket((:a,:b,:a))
-
-adjoint(x::Ket) = Bra(x.name)
+abstract type Field end
+abstract type ScalarField <: Field end
 
 
-adjoint(x::Bra) = Ket(x.name)
+# α β γ δ ε ζ η θ ι κ λ μ ν ξ ο :π ρ σ τ υ φ χ ψ ω
+# Italic Greek
+# 𝛼 𝛽 𝛾 𝛿 𝜀 𝜁 𝜂 𝜃 𝜄 𝜅 𝜆 𝜇 𝜈 𝜉 𝜊 𝜋 𝜌 𝜍 𝜎 𝜏 𝜐 𝜑 𝜒 𝜓 𝜔
+# ᵅᵝᵡᵟᵋᵠᶿ
 
-macro kets(names...)
-    defs = map(names) do name
-        :($(esc(name)) = Ket($(Expr(:quote, name))))
-    end
-    return Expr(:block, defs...,
-        :(tuple($(map(x -> esc(x), names)...))))
-end
-
-macro bras(names...)
-    defs = map(names) do name
-        :($(esc(name)) = Bra($(Expr(:quote, name))))
-    end
-    return Expr(:block, defs...,
-        :(tuple($(map(x -> esc(x), names)...))))
-end
-
-+(a::Ket, b::Ket) = KetState(Dict(a => 1, b => 1))
--(a::Ket, b::Ket) = KetState(Dict(a => 1, b => -1))
-*(a::Ket, b::SymorNum) = KetState(Dict(a => b))
-*(b::SymorNum, a::Ket) = KetState(Dict(a => b))
-/(a::Ket, b::SymorNum) = KetState(Dict(a => 1 / b))
-
-*(a::Ket, b::SymbolicUtils.Symbolic) = KetState(Dict(a => b))
-*(a::SymbolicUtils.Symbolic, b::Ket) = KetState(Dict(b => a))
-/(a::Ket, b::SymbolicUtils.Symbolic) = KetState(Dict(a => 1 / b))
 
 
 end
-
-# Ket(:q,:p) for a scalar field
-# Ket((:q,:r),(:p,:s)) for a vector/spinor field due to the polarisation vector.
-# To reconcile this, rather than defining a new type for spinors, we can just
-qp = Ket((:q, :p, :p))
-pq = Ket((:p, :q))
-(im * qp + √5pq) / 2
-c = (im + √3) / 2
-c'c ≈ 1
-
-@kets ψ ϕ χ
-@syms a b c
-(a + √5)^5 * ψ
-expand((a + √5)^5)
-# The overarching vision:
-"""md
-- Given an initial state |ψ⟩, one can calculate:
-    - aₚ ... aₖ |ψ⟩ -> |ϕ⟩
-    - ⟨ψ| aₖ' ... aₚ' -> ⟨ϕ|
-    - ⟨ϕ| aₖ' ... aₚ' |ψ⟩ -> c (symbolic or not) ∈ 𝐂 (with commutation relations)
-- One can then calculate amplitudes in the Dyson expansion with
-    - ⟨f|ℋ(x)|i⟩ (first order)
-    - ⟨f|ℋ(x)ℋ(y)|i⟩ (second order)
-    - etc...
-- These amplitudes each correspond to a Feynman diagram
-- We therefore have symbolic scattering amplitudes for any scattering process requiring only:
-    - the initial state |ψ⟩
-    - the final state |ϕ⟩
-    - the Hamiltonian ℋ(x) (or the Lagrangian ℒ(x) using a Legendre transform ℋ = π ∂ₜϕ - ℒ)
-    - the commutation relations
-"""

@@ -1,8 +1,7 @@
-
 struct OperatorProduct <: OperatorSym
-    operators::Vector{Union{Operator,OperatorPower}}
+    operators::Vector{OporPower}
 
-    function OperatorProduct(x::Vector{Union{Operator, OperatorPower}})
+    function OperatorProduct(x::Vector{Union{Operator,OperatorPower}})
         if isempty(x)
             return 1
         elseif length(x) == 1
@@ -10,6 +9,45 @@ struct OperatorProduct <: OperatorSym
         else
             new(x)
         end
+    end
+
+    # Given a spread vector of operators, return a new OperatorProduct
+    function OperatorProduct(x::OporPower...)
+        # collect makes this type stable! amazing
+        return OperatorProduct(collect(OporPower, x))
+    end
+
+end
+
+begin "TermInterface"
+    function istree(x::OperatorProduct)
+        println("OperatorProduct: istree called on $x")
+        return true
+    end
+
+    function exprhead(x::OperatorProduct)
+        println("OperatorProduct: Exprhead called on $x")
+        return :call
+    end
+
+    function operation(x::OperatorProduct)
+        println("OperatorProduct: Operation called on $x")
+        return OperatorProduct
+    end
+
+    function arguments(x::OperatorProduct)
+        println("OperatorProduct: Arguments called on $x")
+        return x.operators
+    end
+
+    function metadata(x::OperatorProduct)
+        println("OperatorProduct: Metadata called on $x")
+        return nothing
+    end
+
+    function similarterm(t::OperatorProduct, f, args, symtype; metadata=nothing)
+        println("OperatorProduct: similar term called with $f, $args, $symtype, $metadata, $exprhead")
+        return f(args...)
     end
 end
 
@@ -29,8 +67,8 @@ Base.iterate(x::OperatorProduct) = iterate(x.operators)
 Base.iterate(x::OperatorProduct, i::Int) = iterate(x.operators, i::Int)
 Base.firstindex(x::OperatorProduct) = 1
 Base.getindex(x::OperatorProduct, i::Int) = x.operators[i]
-Base.getindex(x::OperatorProduct, i::AbstractVector{Int}) = length(i) == 1 ? x.operators[i][1] : OperatorProduct(x.operators[i])
-Base.setindex!(x::OperatorProduct, v::Union{Operator,OperatorPower}, i::Int) = x.operators[i] = v
+Base.getindex(x::OperatorProduct, i::AbstractVector{Int}) = OperatorProduct(x.operators[i])
+Base.setindex!(x::OperatorProduct, v::OporPower, i::Int) = x.operators[i] = v
 Base.lastindex(x::OperatorProduct) = length(x.operators)
 
 function Base.:(==)(x::OperatorProduct, y::OperatorProduct)
@@ -42,68 +80,86 @@ function Base.:(==)(x::OperatorProduct, y::OperatorProduct)
 end
 
 function *(x::Operator, y::Operator)
-    if x == I
+    if x == one(Operator)
         return y
-    elseif y == I
+    elseif y == one(Operator)
         return x
     else
-        return x == y ? OperatorPower(x, 2) : OperatorProduct([x, y])
+        return x == y ? OperatorPower(x, 2) : OperatorProduct(OporPower[x, y])
     end
 end
+a_p = a(p)
+a_q = a(q)
+@syms k l
+a_k = a(k)
+a_l = a(l)
+a_p * a_q
 
 function Base.:(*)(x::OperatorProduct, y::Operator)
-    endop = x[end] isa OperatorPower ? x[end].operator : x[end]
+    y == one(Operator) && return x
+    endop, power = x[end] isa OperatorPower ? (x[end].operator, x[end].power) : (x[end],1)
     if endop != y
-        return OperatorProduct([x.operators..., y])
-    elseif x[end] isa Operator
-        return OperatorProduct([x.operators[begin:end-1]..., OperatorPower(y, 2)])
-    else # x.operators[end] isa OperatorPower
-        return OperatorProduct([x.operators[begin:end-1]..., OperatorPower(y, x[end].power + 1)])
+        return OperatorProduct(OporPower[x.operators..., y])
+    else
+        front = x[begin:end-1] isa OperatorProduct ? x[begin:end-1] : [x[begin:end-1]]
+        return OperatorProduct(OporPower[front..., OperatorPower(y, power + 1)])
     end
 end
+a_p * a_q * a_k
+a_p * a_q * a_q
+a_p * a_q^2 * a_q
+a_p * a_q^2 * a_k
 
 function Base.:(*)(x::Operator, y::OperatorProduct)
     return reverse(reverse(y) * x)
 end
+a_p * (a_q * a_k)
+a_p * (a_q * a_q)
+a_p * (a_q^2 * a_q)
+a_p * (a_q^2 * a_k)
 
 function Base.:(*)(x::OperatorProduct, y::OperatorProduct)
-    return OperatorProduct([x.operators..., y.operators...])
-end
-
-# +(a::OperatorProduct, b::SymorNum) = a + OperatorTerm(Dict{OperatorSym,SymorNum}(I => b))
-# +(a::OperatorProduct, b::OperatorProduct) = OperatorTerm(Dict{OperatorSym,SymorNum}(a => 1, b => 1))
-
-# *(b::SymorNum, a::OperatorProduct) = OperatorTerm(Dict{OperatorSym,SymorNum}(a => b))
-# /(a::OperatorProduct, b::SymorNum) = OperatorTerm(Dict{OperatorSym,SymorNum}(a => 1 / b))
-
-# +(a::Operator, b::OperatorProduct) = OperatorTerm(Dict{OperatorSym,SymorNum}(a => 1, b => 1))
-# +(a::OperatorProduct, b::Operator) = OperatorTerm(Dict{OperatorSym,SymorNum}(a => 1, b => 1))
-function Base.:(*)(a::OperatorPower,b::OperatorProduct)
-    if b[1] isa OperatorPower && a.operator == b[1].operator
-        return OperatorProduct([OperatorPower(a.operator, a.power + b[1].power), b[2:end]...])
-    elseif a.operator == b[1]
-        return OperatorProduct([OperatorPower(a.operator, a.power + 1), b[2:end]...])
+    endop, endpower = x[end] isa OperatorPower ? (x[end].operator, x[end].power) : (x[end],1)
+    startop, startpower = y[1] isa OperatorPower ? (y[1].operator,y[1].power) : (y[1],1)
+    if endop != startop
+        return OperatorProduct(OporPower[x.operators..., y.operators...])
     else
-        return OperatorProduct([a, b...])
+        front = x[begin:end-1] isa OperatorProduct ? x[begin:end-1] : [x[begin:end-1]]
+        back = y[2:end] isa OperatorProduct ? y[2:end] : [y[2:end]]
+        power = startpower + endpower
+        return OperatorProduct(OporPower[front..., OperatorPower(endop, power), back...])
     end
 end
+(a_p * a_q) * (a_k * a_p)
+(a_p * a_q^2) * (a_q * a_p)
+(a_p * a_q^2) * (a_k * a_p)
+(a_p * a_q) * (a_q^2 * a_p)
+(a_p * a_k) * (a_q^2 * a_p)
+(a_p * a_q^2) * (a_q^2 * a_k)
 
 function Base.:(*)(a::OperatorProduct,b::OperatorPower)
-    return reverse(b * reverse(a))
+    b == one(OperatorPower) && return a
+    endop, endpower = a[end] isa OperatorPower ? (a[end].operator, a[end].power) : (a[end],1)
+    if endop != b.operator
+        return OperatorProduct(OporPower[a.operators..., b])
+    else
+        front = a[begin:end-1] isa OperatorProduct ? a[begin:end-1] : [a[begin:end-1]]
+        return OperatorProduct(OporPower[front..., OperatorPower(endop, endpower + b.power)])
+    end
 end
+reverse(a_p^3 * a_k) * a_p^2
+reverse(a_q^3 * a_k) * a_p^2
+reverse(a_p * a_q * a_k) * a_p^2
+reverse(a_p * a_k) * a_p^2
 
 
-
-
-
-function adjoint(x::OperatorProduct)
-    return OperatorProduct(map(o -> o', reverse(x.operators)))
+function Base.:(*)(a::OperatorPower,b::OperatorProduct)
+    return reverse(reverse(b) * a)
 end
-
-@operator a_p a_q a_k
-@syms α β
-a_p * a_q * a_k + a_p * a_k + α
-
+reverse(a_p^2 * (a_p^3 * a_k))
+reverse(a_p^2 * (a_q^3 * a_k))
+reverse(a_p^2 * (a_p * a_q * a_k))
+reverse(a_p^2 * (a_p * a_k))
 
 function Base.hash(a::OperatorProduct, h::UInt=UInt(0))
     h = Base.hash(length(a), h)
@@ -112,16 +168,3 @@ function Base.hash(a::OperatorProduct, h::UInt=UInt(0))
     end
     return h
 end
-
-α * a_p + 3a_q + β^2 * a_q
-α * a_p * a_p'
-
-t = a_p * a_q
-q = a_p * a_q
-y = a_q * a_p
-Base.hash(t, UInt(0))
-Base.hash(y, UInt(0))
-t = 3a_p * a_q + α * a_p * a_q
-
-
-a_p * a_q + a_q * a_p * a_p + 3a_p^2

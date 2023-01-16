@@ -1,36 +1,43 @@
-struct Ket
-    name::Tuple{Vararg{Symbol}}
+struct Ket <: BraKet
+    op::OperatorSym
 
-    Ket() = new(tuple())
-    Ket(name::Symbol) = new(tuple(name))
-    Ket(name::String) = new(tuple(Symbol(name)))
-    Ket(name::Tuple{Vararg{Symbol}}) = new(name)
+    Ket() = new(one(Operator))
+    # Define a function to create a Ket from an operator
+    # to be called when applying an operator to the vacuum
+    # We are actually doing a_p * ∣0⟩ = ∣p⟩ not ∣a_p⟩.
+    Ket(op::OperatorSym) = new(op) # Not to be exported or used directly
 end
 
 function Base.show(io::IO, s::Ket)
-    if length(s.name) == 0
+    if s.op == one(Operator)
         print(io, "|0⟩")
         return
     end
     # print(io, "∣", join(s.name, "; "), "⟩")
     # Print np for n occurances of p in s.name
-    print(io,"|")
-    for p in unique(s.name)
-        c = count(x -> x == p, s.name)
-        c > 1 ? print(io, c, p) : print(io, p)
-        # If p is not the last element in unique(s.name), print a space
-        p != unique(s.name)[end] && print(io, "; ")
-    end
-    print(io, "⟩")
+    # Vacuum printing
+    print(io, s.op, "|0⟩")
 end
-Ket((:q, :p, :p, :q))
+
 
 begin "TermInterface"
     function istree(x::Ket)
-        return false
+        return true
     end
 
     function exprhead(x::Ket)
         return :call
     end
+
+    function operation(x::Ket)
+        return Ket
+    end
+
+    function arguments(x::Ket)
+        return [x.op]
+    end
+    function similarterm(t::Ket, f, args, symtype=Ket; metadata=nothing, exprhead=exprhead(t))
+        return f(args...)
+    end
+
 end
