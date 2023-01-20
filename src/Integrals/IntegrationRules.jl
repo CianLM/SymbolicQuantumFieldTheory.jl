@@ -1,12 +1,3 @@
-
-# Define a rule that generalises the above. Namely,
-# Find δ(p - anything) and replace it with 1.
-# Using slot variables (see https://symbolicutils.juliasymbolics.org/api/) to represent 'anything'
-@syms x p
-r = @rule δ(~x) --> ~x
-rt = r(δ(p - x))
-
-
 @syms p q
 is_integration_variable(x::typeof(p)) = p - x isa Number && p - x == 0
 is_integration_variable(x) = false
@@ -30,15 +21,15 @@ rm_lrc = @rule ~~a + ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) + ~~c =>
 # rm_c = @rule ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) => k_equals(~y,+(~~x...,w*~y, ~~z...))
 # rm_lrc = @rule ~~a + ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) + ~~c => k_equals(~y,+(~~x...,w*~y, ~~z...))
 ################
-ex = δ(p - q)
-ex_c = 2*α^2*p*δ(p - q)
-ex_lrc = 5 + 2*α^2*p*δ(p - q)  - α^2*p
-rex = δ(q - p)
-rex_c = 2*α^2*p*δ(q - p)
-rex_lrc = 5 + 2*α^2*p*δ(q - p) - α^2*p
-SymbolicUtils.Chain([r])(ex)
-SymbolicUtils.Chain([r_c])(ex_c)
-SymbolicUtils.Chain([r_lrc])(ex_lrc)
-SymbolicUtils.Chain([rm])(rex)
-SymbolicUtils.Chain([rm_c])(rex_c)
-SymbolicUtils.Chain([rm_lrc])(rex_lrc)
+# ex = δ(p - q)
+# ex_c = 2*α^2*p*δ(p - q)
+# ex_lrc = 5 + 2*α^2*p*δ(p - q)  - α^2*p
+# rex = δ(q - p)
+# rex_c = 2*α^2*p*δ(q - p)
+# rex_lrc = 5 + 2*α^2*p*δ(q - p) - α^2*p
+# SymbolicUtils.Chain([r])(ex)
+# SymbolicUtils.Chain([r_c])(ex_c)
+# SymbolicUtils.Chain([r_lrc])(ex_lrc)
+# SymbolicUtils.Chain([rm])(rex)
+# SymbolicUtils.Chain([rm_c])(rex_c)
+# SymbolicUtils.Chain([rm_lrc])(rex_lrc)

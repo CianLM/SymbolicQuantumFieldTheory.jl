@@ -63,31 +63,62 @@ function Base.show(io::IO, s::OperatorTerm)
         ], " + "))
 end
 
+function Base.show(io::IO, ::MIME"text/latex", s::OperatorTerm)
+    print(io, join([
+            # If v is symbolic
+            if v isa SymbolicUtils.Add || v isa SymbolicUtils.Div
+                "(" * string(v) * ")" * string(k)
+            elseif v isa SymbolicUtils.Symbolic
+                string(v) * string(k)
+                # If the coefficient is 1, then don't print it
+            elseif v == 1
+                string(k)
+                # If the coefficient is -1, then print -ket
+            elseif v == -1
+                "-" * string(k)
+                # If the coefficient is purely imaginary, then print bim
+            elseif v == im
+                "im" * string(k)
+                # If the coefficient is purely imaginary, then print -bim
+            elseif v == -im
+                "-im" * string(k)
+            elseif real(v) == 0
+                string(imag(v)) * "im" * string(k)
+                # If the coefficient is complex, then print it as (a+bim)
+            elseif typeof(v) <: Complex
+                "(" * string(v) * ")" * string(k)
+            else
+                string(v) * string(k)
+            end
+            for (k, v) in s.terms
+        ], " + "))
+end
+
 begin "TermInterface"
     function istree(x::OperatorTerm)
-        println("OperatorTerm: $(x) istree called")
+        #println("OperatorTerm: $(x) istree called")
         return true
     end
 
     function exprhead(x::OperatorTerm)
-        println("OperatorTerm: $(x) exprhead called")
+        #println("OperatorTerm: $(x) exprhead called")
         return :call
     end
 
     function operation(x::OperatorTerm)
-        println("OperatorTerm: $(x) operation called")
+        #println("OperatorTerm: $(x) operation called")
         return _OperatorTerm
         # return +
     end
 
     function arguments(x::OperatorTerm)
-        println("OperatorTerm: $(x) arguments called")
+        #println("OperatorTerm: $(x) arguments called")
         return [keys(x.terms)..., values(x.terms)...]
         # return keys(x.terms) .* values(x.terms)
     end
 
     function similarterm(t::OperatorTerm, f, args, symtype=symtype(t); metadata=nothing, exprhead=exprhead(t))
-        println("OperatorTerm: $(f(args...)) similar term called with $f, $args, $symtype, $metadata, $exprhead")
+        #println("OperatorTerm: $(f(args...)) similar term called with $f, $args, $symtype, $metadata, $exprhead")
         # ? Can be refactored such that the logic in _OperatorTerm is implemented here.
         return f(args...)
     end
@@ -193,16 +224,3 @@ function Base.hash(a::OperatorTerm, h::UInt=UInt(0))
     end
     return h
 end
-
-@syms m g l
-@syms α β
-
-test_term =  β * a(m) + q * a(-q) * a(q)
-test_term * test_term
-
-(a(-q) * a(q)) * (a(q) * a(q) * a(-q))
-(a(q) * a(-q)) * (a(-q) * a(-q) * a(q))
-(α * a(-q) * a(q)) * (a(-q) * 1/α * a(-q) * a(q))
-a(q - p) - a(p - q)
-
-hash(a(m) + a(-m))

@@ -18,13 +18,6 @@ function *(a::Union{Operator,OperatorPower}, b::Ket)
         return Ket(a * b.op)
     end
 end
-v = vacuum()
-a_p * vacuum()
-p = a_p' * vacuum()
-a_q * p
-a_p' * p
-a(-q)'^2 * p
-normalorder(a_q * a_p * a(k)' * a_l')
 
 function *(a::OperatorProduct, b::Ket)
     if !a[end].adjoint && b == vacuum()
@@ -45,7 +38,7 @@ function *(a::OperatorTerm, b::Ket)
     for (ka, va) in a.terms
         applied = ka * b
         # print(typeof(ka), " ", typeof(b), " ", typeof(applied), " ")
-        println("$ka * $b = $applied")
+        # println("$ka * $b = $applied")
         if applied isa Ket
             # println("$applied is a Ket")
             d[applied] = get(d, applied, 0) + va
@@ -55,7 +48,7 @@ function *(a::OperatorTerm, b::Ket)
                 d[kb] = get(d, kb, 0) + va * vb
             end
         else
-            println("Unexpected Term: $applied is neither a Ket nor a KetState")
+            # println("Unexpected Term: $applied is neither a Ket nor a KetState")
         end
     end
     return isempty(d) ? 0 : KetState(d)
@@ -84,77 +77,3 @@ end
 *(a::Bra, b::OperatorTerm) = (b' * a')'
 *(a::BraState, b::T where {T<:OperatorSym}) = (b' * a')'
 *(a::BraState, b::OperatorTerm) = (b' * a')'
-
-
-# !!! testing
-@syms α
-@variables 𝛼
-typeof(𝛼) <: SymorNum
-r = @rule conj(conj(x)) => x
-
-q = vacuum()' * (a_p * a_q)
-vacuum()' * a_p * a_q
-
-(a_p' * a_q') * vacuum()
-one(Operator)^2 * vacuum()
-# |p⟩ = a†ₚ |0⟩
-# aₚ|p⟩ = |0⟩
-
-normalorder(a_p * a_q' * a_k')
-
-v = vacuum()
-p1 = a_p' * v
-p2 = a_q' * p1
-p2 *= α
-p3 = a_k * p2
-p4 = a_l' * p3
-
-
-va = a_k * a_p' * a_q' * v
-vc = a_k * (a_p' * a_q') * v
-vb = a_k * a_p' * (a_q' * v)
-# normalorder(vb)
-va == vb == vc
-normalorder(a_k * a_l * a_p' * a_q') * va
-2(a_k' * a_l') * va
-
-# Ket((:q, :p)) + Ket((:p, :q))
-
-a_p^2 * v
-a_p'^2 * v
-a_p'^2 * a_q' * v
-a_p'^2 * (a_q' * v)
-a_q^2 * (a_p'^3 * v)
-a_q^2 * a_p'^3 * v
-
-v' *  a_p^2 * a_q^2 * a_k'^2
-v' * (a_p^2 * a_q^2 * a_k'^2)
-v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2  * v)
-v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2) * v
-v' * (a_p^2 * a_q^2 * a_k'^2 *(a_l'^2  * v))
-normalorder(a_p * a_q^2 * a_k'^2 * a_l')
-
-@syms b::Complex
-@typeof b
-b * conj(b)
-
-a_k^2 * (a_q'^2 * a_p'^2 * v)
-(a_k^2 * a_q'^2 * a_p'^2) * v
-
-normalorder(a_k * normalorder(a_k * a_q'^2 * a_p'^2)) * v 
-normalorder(a_k^2 * a_q'^2 * a_p'^2) * v
-
-@syms p q
-a = a_p' * a_q' * a_k' * a_l' * v
-b = a_q' * a_p' * a_k' * a_l' * v
-v
-i =  a_p' * v
-o =  a_q' * v
-sc = p * o' * i
-_pi = SymbolicUtils.Sym{Number}(:π)
-substitute(sc, Dict(
-    δ(q - p) => 1,
-     p => -Symbolics.solve_for(
-        arguments(δ(q - p))[1] ~ 0, p
-    )
-))

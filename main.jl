@@ -16,3 +16,6 @@ include("src/Interactions/Commutators.jl")
 include("src/Interactions/NormalOrdering.jl")
 include("src/Interactions/OperatorKetInteractions.jl")
 include("src/Interactions/InnerProducts.jl")
+
+include("src/Integrals/IntegrationRules.jl")
+include("src/Integrals/Integral.jl")

@@ -46,6 +46,41 @@ function Base.show(io::IO, s::KetState)
         ], " + ")
 end
 
+function Base.show(io::IO, ::MIME"text/latex", s::KetState)
+    # Iterate over the dictionary and add the ket and the coefficient joined by +
+    join(io,
+        [
+            # If v is symbolic
+            if v isa SymbolicUtils.Add || v isa SymbolicUtils.Div
+                "(" * string(v) * ")" * string(k)
+            elseif v isa SymbolicUtils.Symbolic || v isa Num
+                string(v) * string(k)
+                # If the coefficient is 1, then don't print it
+            elseif v == 1
+                string(k)
+                # If the coefficient is -1, then print -ket
+            elseif v == -1
+                "-" * string(k)
+                # If the coefficient is purely imaginary, then print bim
+            elseif v == im
+                "im" * string(k)
+                # If the coefficient is purely imaginary, then print -bim
+            elseif v == -im
+                "-im" * string(k)
+            elseif real(v) == 0
+                string(imag(v)) * "im" * string(k)
+                # If the coefficient is complex, then print it as (a+bim)
+            elseif typeof(v) <: Complex
+                "(" * string(v) * ")" * string(k)
+            else
+                string(v) * string(k)
+            end
+            for (k, v) in s.states
+        ], " + ")
+end
+
+
+
 begin "TermInterface"
     function istree(x::KetState)
         return true
@@ -99,6 +134,8 @@ end
 
 +(a::KetState, b::Ket) = a + KetState(Dict{Ket,SymorNum}(b => 1))
 +(a::Ket, b::KetState) = KetState(Dict{Ket,SymorNum}(a => 1)) + b
++(a::KetState, b::SymorNum) = b == 0 ? a : a + KetState(Dict{Ket,SymorNum}(Ket() => b))
++(a::SymorNum, b::KetState) = b + a
 
 -(a::KetState) = KetState(Dict{Ket,SymorNum}(k => -v for (k, v) in a.states))
 -(a::KetState, b::KetState) = a + (-b)

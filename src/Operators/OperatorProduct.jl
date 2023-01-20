@@ -21,37 +21,41 @@ end
 
 begin "TermInterface"
     function istree(x::OperatorProduct)
-        println("OperatorProduct: istree called on $x")
+        #println("OperatorProduct: istree called on $x")
         return true
     end
 
     function exprhead(x::OperatorProduct)
-        println("OperatorProduct: Exprhead called on $x")
+        #println("OperatorProduct: Exprhead called on $x")
         return :call
     end
 
     function operation(x::OperatorProduct)
-        println("OperatorProduct: Operation called on $x")
+        #println("OperatorProduct: Operation called on $x")
         return OperatorProduct
     end
 
     function arguments(x::OperatorProduct)
-        println("OperatorProduct: Arguments called on $x")
+        #println("OperatorProduct: Arguments called on $x")
         return x.operators
     end
 
     function metadata(x::OperatorProduct)
-        println("OperatorProduct: Metadata called on $x")
+        #println("OperatorProduct: Metadata called on $x")
         return nothing
     end
 
     function similarterm(t::OperatorProduct, f, args, symtype; metadata=nothing)
-        println("OperatorProduct: similar term called with $f, $args, $symtype, $metadata, $exprhead")
+        #println("OperatorProduct: similar term called with $f, $args, $symtype, $metadata, $exprhead")
         return f(args...)
     end
 end
 
 function Base.show(io::IO, s::OperatorProduct)
+    print(io, join(s.operators, " "))
+end
+
+function Base.show(io::IO, ::MIME"text/latex", s::OperatorProduct)
     print(io, join(s.operators, " "))
 end
 
@@ -88,12 +92,13 @@ function *(x::Operator, y::Operator)
         return x == y ? OperatorPower(x, 2) : OperatorProduct(OporPower[x, y])
     end
 end
-a_p = a(p)
-a_q = a(q)
-@syms k l
-a_k = a(k)
-a_l = a(l)
-a_p * a_q
+# @syms p q
+# a_p = a(p)
+# a_q = a(q)
+# @syms k l
+# a_k = a(k)
+# a_l = a(l)
+# a_p * a_q
 
 function Base.:(*)(x::OperatorProduct, y::Operator)
     y == one(Operator) && return x
@@ -105,18 +110,18 @@ function Base.:(*)(x::OperatorProduct, y::Operator)
         return OperatorProduct(OporPower[front..., OperatorPower(y, power + 1)])
     end
 end
-a_p * a_q * a_k
-a_p * a_q * a_q
-a_p * a_q^2 * a_q
-a_p * a_q^2 * a_k
+# a_p * a_q * a_k
+# a_p * a_q * a_q
+# a_p * a_q^2 * a_q
+# a_p * a_q^2 * a_k
 
 function Base.:(*)(x::Operator, y::OperatorProduct)
     return reverse(reverse(y) * x)
 end
-a_p * (a_q * a_k)
-a_p * (a_q * a_q)
-a_p * (a_q^2 * a_q)
-a_p * (a_q^2 * a_k)
+# a_p * (a_q * a_k)
+# a_p * (a_q * a_q)
+# a_p * (a_q^2 * a_q)
+# a_p * (a_q^2 * a_k)
 
 function Base.:(*)(x::OperatorProduct, y::OperatorProduct)
     endop, endpower = x[end] isa OperatorPower ? (x[end].operator, x[end].power) : (x[end],1)
@@ -130,12 +135,12 @@ function Base.:(*)(x::OperatorProduct, y::OperatorProduct)
         return OperatorProduct(OporPower[front..., OperatorPower(endop, power), back...])
     end
 end
-(a_p * a_q) * (a_k * a_p)
-(a_p * a_q^2) * (a_q * a_p)
-(a_p * a_q^2) * (a_k * a_p)
-(a_p * a_q) * (a_q^2 * a_p)
-(a_p * a_k) * (a_q^2 * a_p)
-(a_p * a_q^2) * (a_q^2 * a_k)
+# (a_p * a_q) * (a_k * a_p)
+# (a_p * a_q^2) * (a_q * a_p)
+# (a_p * a_q^2) * (a_k * a_p)
+# (a_p * a_q) * (a_q^2 * a_p)
+# (a_p * a_k) * (a_q^2 * a_p)
+# (a_p * a_q^2) * (a_q^2 * a_k)
 
 function Base.:(*)(a::OperatorProduct,b::OperatorPower)
     b == one(OperatorPower) && return a
@@ -147,19 +152,19 @@ function Base.:(*)(a::OperatorProduct,b::OperatorPower)
         return OperatorProduct(OporPower[front..., OperatorPower(endop, endpower + b.power)])
     end
 end
-reverse(a_p^3 * a_k) * a_p^2
-reverse(a_q^3 * a_k) * a_p^2
-reverse(a_p * a_q * a_k) * a_p^2
-reverse(a_p * a_k) * a_p^2
+# reverse(a_p^3 * a_k) * a_p^2
+# reverse(a_q^3 * a_k) * a_p^2
+# reverse(a_p * a_q * a_k) * a_p^2
+# reverse(a_p * a_k) * a_p^2
 
 
 function Base.:(*)(a::OperatorPower,b::OperatorProduct)
     return reverse(reverse(b) * a)
 end
-reverse(a_p^2 * (a_p^3 * a_k))
-reverse(a_p^2 * (a_q^3 * a_k))
-reverse(a_p^2 * (a_p * a_q * a_k))
-reverse(a_p^2 * (a_p * a_k))
+# reverse(a_p^2 * (a_p^3 * a_k))
+# reverse(a_p^2 * (a_q^3 * a_k))
+# reverse(a_p^2 * (a_p * a_q * a_k))
+# reverse(a_p^2 * (a_p * a_k))
 
 function Base.hash(a::OperatorProduct, h::UInt=UInt(0))
     h = Base.hash(length(a), h)

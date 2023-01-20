@@ -13,39 +13,43 @@ end
 OporPower = Union{Operator,OperatorPower}
 begin "TermInterface"
     function istree(x::OperatorPower)
-        println("OperatorPower: Istree called on $x")
+        #println("OperatorPower: Istree called on $x")
         return true
     end
 
     function exprhead(x::OperatorPower)
-        println("OperatorPower: Exprhead called on $x")
+        #println("OperatorPower: Exprhead called on $x")
         return :call
     end
 
     function operation(x::OperatorPower)
-        println("OperatorPower: Operation called on $x")
+        #println("OperatorPower: Operation called on $x")
         return OperatorPower
     end
 
     function arguments(x::OperatorPower)
-        println("OperatorPower: Arguments called on $x")
+        #println("OperatorPower: Arguments called on $x")
         return [x.operator, x.power]
         # Typed tuple
     end
 
     function metadata(x::OperatorPower)
-        println("OperatorPower: Metadata called on $x")
+        #println("OperatorPower: Metadata called on $x")
         return nothing
     end
 
     function similarterm(t::OperatorPower, f, args, symtype; metadata=nothing)
-        println("OperatorPower: similar term called with $f, $args, $symtype, $metadata, $exprhead")
+        #println("OperatorPower: similar term called with $f, $args, $symtype, $metadata, $exprhead")
         return f(args...)
     end
 
 end
 function Base.show(io::IO, s::OperatorPower)
     print(io, "$(s.operator)^$(s.power)")
+end
+
+function Base.show(io::IO, ::MIME"text/latex", s::OperatorPower)
+    print(io, "{$(s.operator)}^$(s.power)")
 end
 
 function Base.:(==)(x::OperatorPower, y::OperatorPower)

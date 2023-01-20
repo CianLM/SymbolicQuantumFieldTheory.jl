@@ -24,8 +24,6 @@ function comm(a::Operator{ScalarField}, b::Operator{ScalarField})
     # testing
     # a.adjoint ⊻ b.adjoint ? (-1)^(a.adjoint) : 0
 end
-@syms p q
-comm(a_p,a_q')
 
 function comm(a::Operator, b::OperatorProduct)
     return b[1] * comm(a, b[2:end]) + comm(a, b[1]) * b[2:end]
@@ -44,30 +42,33 @@ function comm(a::OperatorProduct, b::OperatorProduct)
         return a[1] * comm(a[2:end], b) + comm(a[1], b) * a[2:end]
     end
 end
-k = a_p
-l = a_q'^3
+
+# Op Pow / Pow Op
+function comm(a::OperatorPower, b::Operator)
+    # TODO: Add check if [a,[a,b]] = 0 and then use scalar field comm reductions
+    return sum( a.operator^k * comm(a.operator, b) * a.operator^(a.power - k - 1) for k in 0:a.power-1)
+end
+
 function comm(a::Operator{ScalarField}, b::OperatorPower)
     # Requires [a,[a,b]] = 0 i.e. comm(a,b) is scalar
     # https://math.stackexchange.com/questions/2100302/commutator-of-an-a-dagger-n
     return b.power * b.operator^(b.power - 1) * comm(a, b.operator)
 end
-comm(a::OperatorPower, b::Operator) = -comm(b, a)
-comm(k, l)
-comm(l, k)
 
+comm(a::Operator, b::OperatorPower) = -comm(b, a)
+
+
+
+# Pow Pow
 function comm(a::OperatorPower, b::OperatorPower)
+    # Makes use of comm(op, Pow)    ↓   here    ↓
+    return sum( a.operator^k * comm(a.operator, b) * a.operator^(a.power - k - 1) for k in 0:a.power-1)
+end
+
+function comm(a::OperatorPower{ScalarField}, b::OperatorPower{ScalarField})
     # Only for scalar field https://physics.stackexchange.com/questions/45053/what-is-the-cleverest-way-to-calculate-hatam-hata-dagger-n-when
     return a.adjoint ⊻ b.adjoint ? (-1)^(a.adjoint) * sum([factorial(i) * binomial(a.power, i) * binomial(b.power, i) * b.operator^(b.power - i) * a.operator^(a.power - i) * comm(a.operator,b.operator)^i for i in 1:min(a.power, b.power)]) : 0
 end
-comm(a_p^2,a_k')
-comm(a_p^2, a_q'^1)
-comm(a_p^2, a_q')
-comm(a_p^50, a_q'^3)
-comm(a_p^2,a_q'^2)
-
-a_p^2 * a_q'^2 - a_q'^2 * a_p^2
-
-@typeof comm(a_p,a_k')
 
 
 function comm(x::OperatorTerm, y::OperatorTerm)
@@ -82,7 +83,7 @@ function comm(x::OperatorTerm, y::OperatorTerm)
                     if k isa SymorNum
                         d[I] = get(d, I, 0) + k * v * vx * vy
                     else
-                        println(k, " ", v, " ", vx, " ", vy)
+                        #println(k, " ", v, " ", vx, " ", vy)
                         d[k] = get(d, k, 0) + v * vx * vy
                     end
                 end
@@ -90,7 +91,7 @@ function comm(x::OperatorTerm, y::OperatorTerm)
                 if c isa SymorNum
                     d[I] = get(d, I, 0) + c * vx * vy
                 else
-                    println(typeof(c))
+                    #println(typeof(c))
                     d[c] = get(d, c, 0) + vx * vy
                 end
             end
@@ -117,15 +118,10 @@ function comm(a::OperatorPower, b::OperatorProduct)
         return b[1] * comm(a, b[2:end]) + comm(a, b[1]) * b[2:end]
 end
 
-comm(3a_p, 2a_q' * a_p + a_q')
-comm(a_p,a_q * a_k')
-comm(a_q * a_k', a_p)
-@syms l
-a_l = a(l)
-comm(a_p * a_q, a_k' * a_l')
-comm(a_p * a_p, a_q' * a_q')
-comm(a_p^2, a_q'^2)
-comm(a_p, a_k')
-comm(a_p^2, a_q'^3)
-# needs normal ordering
-comm(a_p, 3a_q') == 3comm(a_p, a_q') == comm(3a_p, a_q')
+# comm(a(p)^50,a(q)'^3)
+
+# vacuum()
+
+# normalorder(a(p) * a(q)')
+# vacuum()' * a(p) * a(q)' * vacuum()
+

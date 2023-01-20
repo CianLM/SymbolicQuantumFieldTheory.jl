@@ -4,13 +4,26 @@ struct Operator{F <: Field} <: OperatorSym
     adjoint::Bool
 
     function (op::AbstractOperator)(index::SymorNum, adjoint::Bool=false)
-        println("$op with index $index is $(new{op.field}(op.name, (index,), adjoint))")
+        # println("$op with index $index is $(new{op.field}(op.name, (index,), adjoint))")
         return new{op.field}(op.name, (index,), adjoint)
+    end
+    function (op::AbstractOperator)(index::SymbolicUtils.Symbolic)
+        # println("$op with (noadj) index $index is $(new{op.field}(op.name, (index,), false))")
+        return new{op.field}(op.name, (index,), false)
     end
 
     function (op::AbstractOperator)(adjoint::Bool = false, indices::SymbolicUtils.Symbolic...)
-        println("... init $op with adjoint $adjoint and indices $indices is $(new{op.field}(op.name, indices, adjoint))")
+        # println("... init $op with adjoint $adjoint and indices $indices is $(new{op.field}(op.name, indices, adjoint))")
         return new{op.field}(op.name, indices, adjoint)
+    end
+
+    function (op::AbstractOperator)(indices::SymbolicUtils.Symbolic...)
+        # println("no adjoint ... init $op and indices $indices is $(new{op.field}(op.name, indices, false))")
+        return new{op.field}(op.name, indices, false)
+    end
+
+    function (op::AbstractOperator)(any...)
+        println("This shouldn't happen. Please submit an issue.")
     end
 
     # function (op::AbstractOperator)(indices::Tuple{SymbolicUtils.Symbolic}, adjoint::Bool=false)
@@ -54,36 +67,54 @@ function Base.show(io::IO, s::Operator)
     # print(io, "$(s.name)_$(s.indices...)$("^†" ^ Int(s.adjoint))")
 end
 
+function Base.show(io::IO, ::MIME"text/latex", s::Operator)
+    if s == one(Operator)
+        print(io, "I")
+    else
+        print(io, s.name)
+        if length(s.indices) > 0
+            subscript = join(s.indices, ",")
+            length(subscript) > 1 ? print(io, "_{$subscript}") : print(io, "_$subscript")
+        end
+        if s.adjoint
+            print(io, "^{\\dagger}")
+        end
+    end
+end
+
+
+
+
 begin "TermInterface"
 
     function istree(x::Operator)
-        println("Is tree called on $x")
+        #println("Is tree called on $x")
         return x != one(Operator)
     end
 
     function exprhead(x::Operator)
-        println("Exprhead called on $x")
+        #println("Exprhead called on $x")
         return :call
     end
 
     function operation(x::Operator)
-        println("Operation called on $x")
+        #println("Operation called on $x")
         return AbstractOperator(ScalarField, x.name)
     end
 
     function arguments(x::Operator)
-        println("Arguments called on $x")
+        #println("Arguments called on $x")
         return (x.adjoint, x.indices...)
         # return x.indices
     end
 
     function metadata(x::Operator)
-        println("Metadata called on $x")
+        #println("Metadata called on $x")
         return nothing
     end
 
     function similarterm(t::Operator, f, args, symtype; metadata=nothing)
-        println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
+        #println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
         return f(args...)
     end
 

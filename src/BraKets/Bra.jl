@@ -21,6 +21,22 @@ function Base.show(io::IO, s::Bra)
     # print(io, "|")
 end
 
+function Base.show(io::IO, ::MIME"text/latex", s::Bra)
+    if s.op == one(Operator)
+        print(io, "\\left\\langle0\\right|")
+        return
+    end
+    print(io, "\\left\\langle0\\right|", s.op)
+    # print(io,"\\left\\langle")
+    # for p in unique(s.name)
+    #     c = count(x -> x == p, s.name)
+    #     c > 1 ? print(io, c, p) : print(io, p)
+    #     # If p is not the last element in unique(s.name), print a space
+    #     p != unique(s.name)[end] && print(io, "; ")
+    # end
+    # print(io, "\\right|")
+end
+
 begin "TermInterface"
     function istree(x::Bra)
         return true
