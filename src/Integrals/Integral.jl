@@ -9,32 +9,32 @@ struct UnevaluatedIntegral <: OperatorSym
     variable::SymbolicUtils.Sym
 
     function UnevaluatedIntegral(integrand::Number, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE Constructed w $(typeof(integrand))")
+        # println("UE Constructed w $(typeof(integrand))")
         return integrand == 0 ? 0 : new(OperatorTerm(normalorder(integrand)), variable)
     end
 
     function UnevaluatedIntegral(integrand::Union{OperatorTerm,SymbolicUtils.Symbolic}, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
+        # println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
         new(OperatorTerm(normalorder(integrand)), variable)
     end
 
     function UnevaluatedIntegral(integrand::T where {T <: OperatorSym}, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE Constructed w $(typeof(integrand))")
+        # println("UE Constructed w $(typeof(integrand))")
         new(OperatorTerm(normalorder(integrand)), variable)
     end
 
     function UnevaluatedIntegral(integrand::Ket, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE constructed w $(typeof(integrand))")
+        # println("UE constructed w $(typeof(integrand))")
         Ket( new(OperatorTerm(integrand.op), variable) )
     end
 
     function UnevaluatedIntegral(integrand::Bra, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE constructed w $(typeof(integrand))")
+        # println("UE constructed w $(typeof(integrand))")
         Bra( new(OperatorTerm(integrand.op), variable) )
     end
 
     function UnevaluatedIntegral(integrand::KetState, variable::SymbolicUtils.Sym{Number,Nothing})
-        println("UE constructed w $(typeof(integrand))")
+        # println("UE constructed w $(typeof(integrand))")
         dict = Dict{Ket,SymorNum}()
         for (k,v) in integrand.states
                 dict[k] = get(dict, k, 0) + UnevaluatedIntegral(v * k.op, variable)
@@ -185,8 +185,8 @@ end
 # twopi = 2*SymbolicUtils.Sym{Number}(:π)
 # # To get how to type a symbol in Julia one can run the function below
 # @operators ScalarField a
-ℋ = 1/(twopi) * E(q) * a(q)' * a(q)
-t1 = integrate(ℋ * a(p)', q) * v
+## ℋ = 1/(twopi) * E(q) * a(q)' * a(q)
+## t1 = integrate(ℋ * a(p)', q) * v
 # t2 = integrate(ℋ * a(p)' * v, q)
 # # @typeof t1.integrand
 

@@ -15,10 +15,8 @@ import SymbolicUtils
 using SymbolicUtils.Rewriters: RestartedChain, Fixpoint
 import SymbolicUtils.Code
 using TermInterface
-using Metatheory
-using Metatheory.Library
-using LaTeXStrings
-using Latexify
+# using LaTeXStrings
+# using Latexify
 
 using MacroTools
 
@@ -39,7 +37,6 @@ export Field, ScalarField
 # 𝛼 𝛽 𝛾 𝛿 𝜀 𝜁 𝜂 𝜃 𝜄 𝜅 𝜆 𝜇 𝜈 𝜉 𝜊 𝜋 𝜌 𝜍 𝜎 𝜏 𝜐 𝜑 𝜒 𝜓 𝜔
 # ᵅᵝᵡᵟᵋᵠᶿ
 # ? == TODO
-# !!! Necesary by Thursday Night
 # ? Add anticommutator support and add metadata to fields to make ^2n vanish for fermions
 # ? Fix integration of OperatorSyms and Integral Interactions
 # ? Add Spinors
@@ -69,4 +66,14 @@ include("Integrals/IntegrationRules.jl")
 include("Integrals/Integral.jl")
 
 
+# testing
+@field James
+@operators James f
+@syms a b c
+@comm [f(a),f(b)'] = f(a)*f(b)'
+comm(f(c),f(a)')
+comm(f(a),f(b)' * f(c)')
+
+comm(f(a)' * f(b), f(b)' * f(a))
+# normalorder(t)
 end

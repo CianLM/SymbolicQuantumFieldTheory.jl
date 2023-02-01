@@ -10,13 +10,14 @@ This package is in active development and is not production ready. Feel free to 
 
 ```julia
 using QFT
+using Symbolics
 @operator ScalarField a
 @syms p q
 # then we can do
 comm(a(p),a(q)')
 normalorder(a(p) * a(q)')
 a(p)'^2 * a(q)' * vacuum()
-ℋ = 1/(twopi) * E(q) * a(q)' * a(q)
+ℋ = E(q) * a(q)' * a(q)
 integrate(ℋ * a(p)', q)
 ```
 

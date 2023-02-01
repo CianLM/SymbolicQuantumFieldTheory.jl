@@ -26,21 +26,18 @@ function comm(a::Operator{ScalarField}, b::Operator{ScalarField})
 end
 
 function comm(a::Operator, b::OperatorProduct)
+    # printstyled("comm called with [$a, $b]",color=:green)
     return b[1] * comm(a, b[2:end]) + comm(a, b[1]) * b[2:end]
 end
 
 function comm(a::OperatorProduct, b::Operator)
+    # printstyled("comm called with [$a, $b]",color=:magenta)
     return a[1] * comm(a[2:end], b) + comm(a[1], b) * a[2:end]
 end
 
 function comm(a::OperatorProduct, b::OperatorProduct)
-    if length(a) == 1
-        return comm(a[1], b)
-    elseif length(b) == 1
-        return comm(a, b[1])
-    else
-        return a[1] * comm(a[2:end], b) + comm(a[1], b) * a[2:end]
-    end
+    # printstyled("comm called with [$a, $b]",color=:cyan)
+    return a[1] * comm(a[2:end], b) + comm(a[1], b) * a[2:end]
 end
 
 # Op Pow / Pow Op
@@ -124,4 +121,3 @@ end
 
 # normalorder(a(p) * a(q)')
 # vacuum()' * a(p) * a(q)' * vacuum()
-

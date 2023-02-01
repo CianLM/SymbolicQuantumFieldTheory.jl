@@ -3,7 +3,7 @@ normalorder(x::Operator) = x
 normalorder(x::OperatorPower) = x
 function normalorder(x::OperatorProduct)
     # TODO: Add in total ordering of symbols to ensure that the normal ordering is unique.
-    if length(x) == 1 || isnormalordered(x)
+    if isnormalordered(x)
         return x
     elseif length(x) == 2
         return x[2].adjoint ? x[2] * x[1] + comm(x[1], x[2]) : x

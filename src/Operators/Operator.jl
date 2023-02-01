@@ -39,7 +39,7 @@ struct Operator{F <: Field} <: OperatorSym
 
     function Operator{F}(name::Symbol, indices::Tuple{Vararg{SymorNum}}, adjoint::Bool) where F <: Field
         # println("Operator with name $name, indices $indices, adjoint $adjoint is $(new{F}(name, indices, adjoint))")
-        println("Operator: $(new{F}(name, indices, adjoint)): $name $indices $adjoint")
+        # println("Operator: $(new{F}(name, indices, adjoint)): $name $indices $adjoint")
         return new{F}(name, indices, adjoint)
     end
     
