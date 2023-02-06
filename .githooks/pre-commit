@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# This hook removes println debugging statements from your Julia code before you commit it.
+# It will not let you commit if it finds any non-commented println debugging statements.
+
+# This hook is based on the pre-commit hook from the git hooks tutorial:
+# http://githooks.com/
+
+
+# Check for println debugging statements
+if git diff --cached --name-only | grep -q '\.jl$'; then
+    echo "Checking for println debugging statements..."
+    git diff --cached --name-only | grep '\.jl$' | xargs grep -n 'println('
+    if [ $? -eq 0 ]; then
+        echo "Found println debugging statements. Please remove them before committing."
+        exit 1
+    fi
+fi
+
+# If we got this far, then everything is good.
+exit 0

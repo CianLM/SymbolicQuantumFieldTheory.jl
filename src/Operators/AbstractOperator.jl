@@ -58,27 +58,26 @@ end
 
 macro comm(ex)
     MacroTools.@capture(ex, [a_, b_] = c_) || error("expected a commutation relation of the form [a(p), b(q)] = f(p,q)")
-    println("[$a,$b] = $c")
-    # println("$(Operator{field(eval(a))})")
-    @syms 𝚕 𝚛
+    println("[$(esc(a)),$(esc(b))] = $c")
+    # println(@__MODULE__)
+    # println(__module__)
     return quote
-        # println(typeof($a),typeof($b))
-        function $(esc(:comm))(𝚕::Operator{field($a)}, 𝚛::Operator{field($b)})
-            println("comm called with [$𝚕, $𝚛]")
-            if $a == one(Operator{field($a)}) || $b == one(Operator{field($b)})
-                println("one")
+        # println(typeof($(esc(a))),typeof($(esc(b))))
+        function $(esc(:comm))($(esc(:u1))::Operator{field($(esc(a)))}, $(esc(:u2))::Operator{field($(esc(b)))})
+            esc_a = $(esc(a))
+            esc_b = $(esc(b))
+            # println("$esc_a, $esc_b")
+            # println("comm called with [$u1, $u2]")
+            if esc_a == one(Operator{field(esc_a)}) || esc_b == one(Operator{field(esc_b)})
                 return 0
-            elseif !(($a.name == 𝚕.name || $b.name == 𝚛.name) || ($a.name == 𝚛.name || $b.name == 𝚕.name))
-                println($a.name, 𝚕.name, $b.name, 𝚛.name)
-                println(($a.name != 𝚕.name || $b.name != 𝚛.name), ($a.name != 𝚛.name || $b.name != 𝚕.name))
+            elseif !((esc_a.name == u1.name || esc_b.name == u2.name) || (esc_a.name == u2.name || esc_b.name == u1.name))
                 return 0
-            elseif 𝚕.adjoint == $a.adjoint && 𝚛.adjoint == $b.adjoint || 𝚕.adjoint == $b.adjoint && 𝚛.adjoint == $a.adjoint
-                println("substituting...")
-                cc = substitute($c, Dict(zip($a.indices, 𝚕.indices)) ∪ Dict(zip($b.indices, 𝚛.indices)))
+            elseif u1.adjoint == esc_a.adjoint && u2.adjoint == esc_b.adjoint || u1.adjoint == esc_b.adjoint && u2.adjoint == esc_a.adjoint
+                # println("substituting...")
+                cc = substitute($(esc(c)), Dict(zip(esc_a.indices, u1.indices)) ∪ Dict(zip(esc_b.indices, u2.indices)))
                 # Parity fixing ± the specified commutation due to antisymmetry of the Lie bracket
-                return (-1)^(Int(𝚕.adjoint == $b.adjoint) + Int($𝚕.name == b.name)) * cc
+                return (-1)^(Int(u1.adjoint == esc_b.adjoint) + Int(u1.name == esc_b.name)) * cc
             else
-                println("else")
                 return 0
             end
         end
@@ -92,4 +91,3 @@ end
 # # comm(b(p,t), c(q,p)')
 # @comm [ee(q), ll(p)'] = 5
 # comm(ee(q), ll(p)')
-

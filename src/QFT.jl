@@ -46,7 +46,7 @@ include("Operators/AbstractOperator.jl")
 include("Operators/Operator.jl")
 include("Operators/OperatorPower.jl")
 include("Operators/OperatorProduct.jl")
-include("Operators/OperatorTerm.jl") # testing
+include("Operators/OperatorTerm.jl")
 
 export vacuum
 include("BraKets/Bra.jl")
@@ -67,13 +67,13 @@ include("Integrals/Integral.jl")
 
 
 # testing
-@field James
-@operators James f
-@syms a b c
-@comm [f(a),f(b)'] = f(a)*f(b)'
-comm(f(c),f(a)')
-comm(f(a),f(b)' * f(c)')
+# @field James
+# @operators James f
+# @syms a b c
+# @comm [f(a),f(b)'] = f(a)*f(b)'
+# comm(f(c),f(a)')
+# comm(f(a),f(b)' * f(c)')
 
-comm(f(a)' * f(b), f(b)' * f(a))
+# comm(f(a)' * f(b), f(b)' * f(a))
 # normalorder(t)
 end
