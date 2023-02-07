@@ -1,16 +1,17 @@
-@syms p q 
-@ScalarFieldOperator a
-a_p = a(p)
-a(-2p + q)
-operation(a_p)
-arguments(a_p)
+@testset "Operator" begin
+    @syms p q 
+    @operator ScalarField a
+    a_p = a(p)
+    a(-2p + q)
+    operation(a_p)
+    arguments(a_p)
 
-substitute(a(p + q), Dict(p => q))
+    @test substitute(a(p + q), Dict(p => q)) == a(2q)
 
-istree(a(p))
-exprhead(a(p))
-operation(a(p))
-similarterm(a(p)', a, (q,))
+    @test istree(a(p)) == true
+    @test operation(a(p)) == a
+    @test similarterm(a(p), a, (q,)) == a(q)
+end
 
 
 # macro operator(names...)

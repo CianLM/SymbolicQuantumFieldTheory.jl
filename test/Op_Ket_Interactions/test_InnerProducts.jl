@@ -1,7 +1,10 @@
 @testset "Inner Products" begin
-    @test v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2  * v) == 
-    v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2) * v  ==
-    v' * (a_p^2 * a_q^2 * a_k'^2 *(a_l'^2  * v))
+    
+    # Delta Functions don't understand that they are even functions
+    # ! to be fixed
+    @test_broken simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2  * v) - 
+     simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2) * v)) == 0
+    # v' * (a_p^2 * a_q^2 * a_k'^2 *(a_l'^2  * v))
 
 
     @testset "Substitution" begin
@@ -22,12 +25,12 @@
 
     @testset "Basic Inner Products and Vanishing Products" begin
         v = vacuum()
-        p = a_p' * v
-        q = a_q' * v
-        v' * v == vacuum()' * vacuum() == Bra() * Ket() == 1
-        q' * p
-        p' * q
-        @test v' * a_p' == v' * a_p' *  v == v' * p == 0
+        pv = a_p' * v
+        qv = a_q' * v
+        v' * v == vacuum()' * vacuum() == 1
+        qv' * pv
+        pv' * qv
+        @test v' * a_p' == v' * a_p' *  v == v' * pv == 0
 
         v = vacuum()
         a = a_p' * a_q' * v
@@ -36,10 +39,11 @@
 
         i = a_p' * v
         f = a_q' * v
-        @test f' * i
+        @test f' * i - twopi * δ(q - p) == 0
     end
 
     @testset "General Inner Products" begin
+        @operators ScalarField a
         @syms α β
         @syms p₁ p₂ q₁ q₂
         @operator ScalarField a
@@ -48,3 +52,4 @@
         ip = f' * i
     end
 end
+

@@ -1,13 +1,13 @@
-a_p = a(p)
-a_q = a(q)
+@testset "Ket" begin
+    @operators ScalarField a
+    @syms p
+    I = one(typeof(a(p)))
+    @test vacuum() == I*vacuum()
+    x = a(p)' * vacuum()
 
-ap2 = a_p^2
+    @test istree(x) == true
+    # exprhead(ap2)
+    @test similarterm(x, operation(x), arguments(x)) == x
 
-
-istree(ap2)
-exprhead(ap2)
-operation(ap2)
-arguments(ap2)
-similarterm(ap2, OperatorPower, (a_q,3))
-
-substitute(a(p)^5, Dict(p => q))
+    @test substitute(x, Dict(p => q)) == a(q)' * vacuum()
+end

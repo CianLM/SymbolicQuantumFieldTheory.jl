@@ -2,7 +2,6 @@
 
 @testset "OperatorTerm" begin
     @testset "Don't Error" begin
-        @operators a_p * a_q
         @syms α β γ
         q = (α + β) * a_p * a_q
         p = β * a_q * a_p
@@ -15,23 +14,22 @@
         a_p + a_q + a_p
         
         a_p + a_q
-        a_p * a_q + α * a_p * a_q + 2
+        @test a_p * a_q + α * a_p * a_q + 2 == (1 + α) * a_p * a_q + 2
     end
 
     @testset "Random Tests" begin
-                
+        @operator ScalarField a
+        @syms p q
         @syms m g l
         @syms α β
-
         test_term =  β * a(m) + q * a(-q) * a(q)
         test_term * test_term
 
         (a(-q) * a(q)) * (a(q) * a(q) * a(-q))
-        (a(q) * a(-q)) * (a(-q) * a(-q) * a(q))
-        (α * a(-q) * a(q)) * (a(-q) * 1/α * a(-q) * a(q))
         a(q - p) - a(p - q)
-
-        hash(a(m) + a(-m))
+        
+        @test (a(q) * a(-q)) * (a(-q) * a(-q) * a(q)) == (α * a(q) * a(-q)) * (a(-q) * 1/α * a(-q) * a(q))
+        @test startswith(string(hash(a(m) + a(-m))), "46") 
     end
 
     @testset "TermInterface Integration" begin
@@ -43,11 +41,11 @@
     
     
         istree(ap_term)
-        exprhead(ap_term)
+        # exprhead(ap_term)
         operation(ap_term)
         arguments(ap_term)
     
-        substitute(ap_term, Dict(p => -q))
+        @test substitute(ap_term, Dict(p => -q)) == α * a(-q) + β * a(-q) * a(q) - q * a(q)^5
     end
     
 end
