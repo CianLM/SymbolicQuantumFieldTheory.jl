@@ -15,3 +15,4 @@ function adjoint(x::OperatorTerm)
 end
 
 adjoint(x::SymbolicUtils.Symbolic) = conj(x)
+conj(x::SymbolicUtils.Symbolic) = real(x) - im * imag(x)

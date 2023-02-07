@@ -40,7 +40,6 @@ macro field(name)
         abstract type $name <: Field end
     end
 end
-@field DiracField
 
 macro operator(field, op)
     return :($(esc(op)) = AbstractOperator($(esc(field)), $(Expr(:quote, Symbol(string(op))))))
@@ -58,7 +57,7 @@ end
 
 macro comm(ex)
     MacroTools.@capture(ex, [a_, b_] = c_) || error("expected a commutation relation of the form [a(p), b(q)] = f(p,q)")
-    println("[$(esc(a)),$(esc(b))] = $c")
+    # println("[$(esc(a)),$(esc(b))] = $c")
     # println(@__MODULE__)
     # println(__module__)
     return quote
@@ -73,7 +72,6 @@ macro comm(ex)
             elseif !((esc_a.name == u1.name || esc_b.name == u2.name) || (esc_a.name == u2.name || esc_b.name == u1.name))
                 return 0
             elseif u1.adjoint == esc_a.adjoint && u2.adjoint == esc_b.adjoint || u1.adjoint == esc_b.adjoint && u2.adjoint == esc_a.adjoint
-                # println("substituting...")
                 cc = substitute($(esc(c)), Dict(zip(esc_a.indices, u1.indices)) ∪ Dict(zip(esc_b.indices, u2.indices)))
                 # Parity fixing ± the specified commutation due to antisymmetry of the Lie bracket
                 return (-1)^(Int(u1.adjoint == esc_b.adjoint) + Int(u1.name == esc_b.name)) * cc

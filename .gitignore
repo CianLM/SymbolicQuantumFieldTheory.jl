@@ -1,2 +1,4 @@
 /Manifest.toml
 /experiments
+/.githooks
+.ipynb_checkpoints

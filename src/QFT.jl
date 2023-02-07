@@ -55,7 +55,7 @@ include("BraKets/KetState.jl")
 include("BraKets/BraState.jl")
 include("BraKets/Adjoints.jl")
 
-export comm, normalorder, isnormalordered
+export comm, normalorder, symbolorder, isnormalordered
 include("Interactions/Commutators.jl")
 include("Interactions/NormalOrdering.jl")
 include("Interactions/OperatorKetInteractions.jl")

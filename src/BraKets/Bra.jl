@@ -37,6 +37,8 @@ function Base.show(io::IO, ::MIME"text/latex", s::Bra)
     # print(io, "\\right|")
 end
 
+Base.:(==)(a::Bra, b::Bra) = a.op == b.op
+
 begin "TermInterface"
     function istree(x::Bra)
         return true
@@ -58,11 +60,3 @@ begin "TermInterface"
         return f(args...)
     end
 end
-
-# macro bras(names...)
-#     defs = map(names) do name
-#         :($(esc(name)) = Bra($(Expr(:quote, name))))
-#     end
-#     return Expr(:block, defs...,
-#         :(tuple($(map(x -> esc(x), names)...))))
-# end

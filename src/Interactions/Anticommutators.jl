@@ -70,7 +70,7 @@ function anticomm(x::OperatorTerm, y::OperatorTerm)
                     if k isa SymorNum
                         d[I] = get(d, I, 0) + k * v * vx * vy
                     else
-                        println(k, " ", v, " ", vx, " ", vy)
+                        # println(k, " ", v, " ", vx, " ", vy)
                         d[k] = get(d, k, 0) + v * vx * vy
                     end
                 end
@@ -78,7 +78,7 @@ function anticomm(x::OperatorTerm, y::OperatorTerm)
                 if c isa SymorNum
                     d[I] = get(d, I, 0) + c * vx * vy
                 else
-                    println(typeof(c))
+                    # println(typeof(c))
                     d[c] = get(d, c, 0) + vx * vy
                 end
             end

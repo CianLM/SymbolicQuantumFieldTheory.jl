@@ -23,7 +23,7 @@ struct Operator{F <: Field} <: OperatorSym
     end
 
     function (op::AbstractOperator)(any...)
-        println("This shouldn't happen. Please submit an issue.")
+        error("This shouldn't happen. Please submit an issue.")
     end
 
     # function (op::AbstractOperator)(indices::Tuple{SymbolicUtils.Symbolic}, adjoint::Bool=false)
@@ -113,7 +113,12 @@ begin "TermInterface"
         return nothing
     end
 
-    function similarterm(t::Operator, f, args, symtype; metadata=nothing)
+    # function similarterm(t::Operator, f, args, symtype; metadata=nothing)
+    #     #println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
+    #     return f(args...)
+    # end
+
+    function similarterm(t::Operator, f, args, symtype; exprhead=:call, metadata=nothing)
         #println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
         return f(args...)
     end

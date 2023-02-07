@@ -38,7 +38,7 @@ begin "TermInterface"
         return nothing
     end
 
-    function similarterm(t::OperatorPower, f, args, symtype; metadata=nothing)
+    function similarterm(t::OperatorPower, f, args, symtype; exprhead=:call, metadata=nothing)
         #println("OperatorPower: similar term called with $f, $args, $symtype, $metadata, $exprhead")
         return f(args...)
     end

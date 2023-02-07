@@ -31,7 +31,7 @@ function Base.show(io::IO, ::MIME"text/latex", s::Ket)
     print(io, s.op, "\\left|0\\right\\rangle")
 end
 
-Base.:(==)(a::Ket, b::Ket) = normalorder(a.op) == normalorder(b.op)
+Base.:(==)(a::Ket, b::Ket) = a.op == b.op
 
 begin "TermInterface"
     function istree(x::Ket)

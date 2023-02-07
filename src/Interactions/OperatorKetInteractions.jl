@@ -34,7 +34,7 @@ end
 
 function *(a::OperatorTerm, b::Ket)
     d = Dict{Ket,SymorNum}()
-    println(a)
+    # println(a)
     for (ka, va) in a.terms
         applied = ka * b
         # print(typeof(ka), " ", typeof(b), " ", typeof(applied), " ")
