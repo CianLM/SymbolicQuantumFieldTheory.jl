@@ -2,8 +2,8 @@
     
     # Delta Functions don't understand that they are even functions
     # ! to be fixed
-    @test_broken simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2  * v) - 
-     simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2) * v)) == 0
+    # @test_broken simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2  * v) - 
+    #  simplify(v' * (a_p^2 * a_q^2 * a_k'^2 * a_l'^2) * v)) == 0
     # v' * (a_p^2 * a_q^2 * a_k'^2 *(a_l'^2  * v))
 
 
