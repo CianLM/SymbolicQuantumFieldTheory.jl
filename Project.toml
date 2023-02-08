@@ -21,7 +21,7 @@ MacroTools = "0.5"
 Revise = "3"
 SymbolicUtils = "0.19"
 Symbolics = "4"
-TermInterface = "0.2"
+TermInterface = "0.2, 0.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
