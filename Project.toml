@@ -19,7 +19,7 @@ LaTeXStrings = "1"
 Latexify = "0.15"
 MacroTools = "0.5"
 Revise = "3"
-SymbolicUtils = "0.19"
+SymbolicUtils = "0.19, 1"
 Symbolics = "4"
 TermInterface = "0.2"
 
