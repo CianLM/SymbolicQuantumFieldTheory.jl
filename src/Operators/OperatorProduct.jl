@@ -55,8 +55,10 @@ function Base.show(io::IO, s::OperatorProduct)
     print(io, join(s.operators, " "))
 end
 
-function Base.show(io::IO, ::MIME"text/latex", s::OperatorProduct)
-    print(io, join(s.operators, " "))
+@latexrecipe function f(x::OperatorProduct)
+    env --> :equation
+    cdot --> false
+    return Expr(:call, :*, x.operators...)
 end
 
 function length(x::OperatorProduct)

@@ -15,8 +15,8 @@ import SymbolicUtils
 using SymbolicUtils.Rewriters: RestartedChain, Fixpoint
 import SymbolicUtils.Code
 using TermInterface
-# using LaTeXStrings
-# using Latexify
+using LaTeXStrings
+using Latexify
 
 using MacroTools
 

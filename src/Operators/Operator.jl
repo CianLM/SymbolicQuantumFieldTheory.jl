@@ -67,21 +67,15 @@ function Base.show(io::IO, s::Operator)
     # print(io, "$(s.name)_$(s.indices...)$("^†" ^ Int(s.adjoint))")
 end
 
-function Base.show(io::IO, ::MIME"text/latex", s::Operator)
-    if s == one(Operator)
-        print(io, "I")
+@latexrecipe function f(x::Operator)
+    env --> :equation
+    cdot --> false
+    if x == one(Operator)
+        return "I"
     else
-        print(io, s.name)
-        if length(s.indices) > 0
-            subscript = join(s.indices, ",")
-            length(subscript) > 1 ? print(io, "_{$subscript}") : print(io, "_$subscript")
-        end
-        if s.adjoint
-            print(io, "^{\\dagger}")
-        end
+        return Expr(:call, :*, string(x.name), (length(x.indices) > 0 ? "_{$(join(x.indices, ","))}" : ""), (x.adjoint ? "^{\\dagger}" : "") )
     end
 end
-
 
 
 
@@ -143,5 +137,4 @@ function Base.hash(x::Operator, h::UInt=UInt(0))
     h = Base.hash(x.adjoint, h)
     return h
 end
-
 

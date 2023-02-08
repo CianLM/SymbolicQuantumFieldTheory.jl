@@ -46,38 +46,74 @@ function Base.show(io::IO, s::KetState)
         ], " + ")
 end
 
-function Base.show(io::IO, ::MIME"text/latex", s::KetState)
-    # Iterate over the dictionary and add the ket and the coefficient joined by +
-    join(io,
-        [
-            # If v is symbolic
-            if v isa SymbolicUtils.Add || v isa SymbolicUtils.Div
-                "(" * string(v) * ")" * string(k)
-            elseif v isa SymbolicUtils.Symbolic || v isa Num
-                string(v) * string(k)
-                # If the coefficient is 1, then don't print it
-            elseif v == 1
-                string(k)
-                # If the coefficient is -1, then print -ket
-            elseif v == -1
-                "-" * string(k)
-                # If the coefficient is purely imaginary, then print bim
-            elseif v == im
-                "im" * string(k)
-                # If the coefficient is purely imaginary, then print -bim
-            elseif v == -im
-                "-im" * string(k)
-            elseif real(v) == 0
-                string(imag(v)) * "im" * string(k)
-                # If the coefficient is complex, then print it as (a+bim)
-            elseif typeof(v) <: Complex
-                "(" * string(v) * ")" * string(k)
-            else
-                string(v) * string(k)
-            end
-            for (k, v) in s.states
-        ], " + ")
+@latexrecipe function f(x::KetState)
+    env --> :equation
+    cdot --> false
+    return Expr(:call, :*, 
+            # k1, v1, k2, v2, ..., kn, vn
+        join([
+        if v isa SymbolicUtils.Add || v isa SymbolicUtils.Div
+            "(" * string(v) * ")" * string(k)
+        elseif v isa SymbolicUtils.Symbolic
+            string(v) * string(k) 
+            # If the coefficient is 1, then don't print it
+        elseif v == 1
+            string(k)
+            # If the coefficient is -1, then print -ket
+        elseif v == -1
+            "-" * string(k)
+            # If the coefficient is purely imaginary, then print bim
+        elseif v == im
+            "i" * string(k)
+            # If the coefficient is purely imaginary, then print -bim
+        elseif v == -im
+            "-i" * string(k)
+        elseif real(v) == 0
+            string(imag(v)) * "i" * string(k)
+            # If the coefficient is complex, then print it as (a+bim)
+        elseif typeof(v) <: Complex
+            "(" * string(v) * ")" * string(k)
+        else
+            string(v) * string(k)
+        end
+        for (k, v) in x.states], " + ")...
+    )
 end
+
+Base.show(io::IO, ::MIME"text/latex", x::KetState) = print(io, "\$\$ " * latexify(x) * " \$\$")
+
+# function Base.show(io::IO, ::MIME"text/latex", s::KetState)
+#     # Iterate over the dictionary and add the ket and the coefficient joined by +
+#     join(io,
+#         [
+#             # If v is symbolic
+#             if v isa SymbolicUtils.Add || v isa SymbolicUtils.Div
+#                 "(" * string(v) * ")" * string(k)
+#             elseif v isa SymbolicUtils.Symbolic || v isa Num
+#                 string(v) * string(k)
+#                 # If the coefficient is 1, then don't print it
+#             elseif v == 1
+#                 string(k)
+#                 # If the coefficient is -1, then print -ket
+#             elseif v == -1
+#                 "-" * string(k)
+#                 # If the coefficient is purely imaginary, then print bim
+#             elseif v == im
+#                 "im" * string(k)
+#                 # If the coefficient is purely imaginary, then print -bim
+#             elseif v == -im
+#                 "-im" * string(k)
+#             elseif real(v) == 0
+#                 string(imag(v)) * "im" * string(k)
+#                 # If the coefficient is complex, then print it as (a+bim)
+#             elseif typeof(v) <: Complex
+#                 "(" * string(v) * ")" * string(k)
+#             else
+#                 string(v) * string(k)
+#             end
+#             for (k, v) in s.states
+#         ], " + ")
+# end
 
 
 

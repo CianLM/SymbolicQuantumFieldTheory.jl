@@ -6,7 +6,7 @@
 
 This package is in active development and is not production ready. Feel free to reach out with suggestions/issues.
 
-Documentation is under construction. LaTeX printing in ipynb is also under construction.
+Documentation is under construction. See `test.ipynb` for LaTeX printing and more example usage.
 
 ## Basic Syntax
 

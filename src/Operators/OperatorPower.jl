@@ -48,8 +48,10 @@ function Base.show(io::IO, s::OperatorPower)
     print(io, "$(s.operator)^$(s.power)")
 end
 
-function Base.show(io::IO, ::MIME"text/latex", s::OperatorPower)
-    print(io, "{$(s.operator)}^$(s.power)")
+@latexrecipe function f(x::OperatorPower)
+    env --> :equation
+    cdot --> false
+    return Expr(:call, :*, "\\left(", x.operator, "\\right)", "^{$(x.power)}")
 end
 
 function Base.:(==)(x::OperatorPower, y::OperatorPower)

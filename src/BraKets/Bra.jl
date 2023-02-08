@@ -20,13 +20,9 @@ function Base.show(io::IO, s::Bra)
     # end
     # print(io, "|")
 end
-
-function Base.show(io::IO, ::MIME"text/latex", s::Bra)
-    if s.op == one(Operator)
-        print(io, "\\left\\langle0\\right|")
-        return
-    end
-    print(io, "\\left\\langle0\\right|", s.op)
+@latexrecipe function f(x::Bra)
+    env --> :equation
+    cdot --> false
     # print(io,"\\left\\langle")
     # for p in unique(s.name)
     #     c = count(x -> x == p, s.name)
@@ -34,8 +30,11 @@ function Base.show(io::IO, ::MIME"text/latex", s::Bra)
     #     # If p is not the last element in unique(s.name), print a space
     #     p != unique(s.name)[end] && print(io, "; ")
     # end
-    # print(io, "\\right|")
+    return Expr(:call, :*, "\\left\\langle 0\\right|", x.op == one(Operator) ? "" : x.op)
 end
+Base.show(io::IO, ::MIME"text/latex", x::Bra) = print(io, "\$\$ " * latexify(x) * " \$\$")
+
+
 
 Base.:(==)(a::Bra, b::Bra) = a.op == b.op
 

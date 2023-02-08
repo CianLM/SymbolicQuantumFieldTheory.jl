@@ -19,17 +19,16 @@ function Base.show(io::IO, s::Ket)
     # Vacuum printing
     print(io, s.op, "|0⟩")
 end
-
-function Base.show(io::IO, ::MIME"text/latex", s::Ket)
-    if s.op == one(Operator)
-        print(io, "\\left|0\\right\\rangle")
-        return
-    end
-    # print(io, "\\left|", join(s.name, "; "), "\\right\\rangle")
-    # Print np for n occurances of p in s.name
-    # Vacuum printing
-    print(io, s.op, "\\left|0\\right\\rangle")
+@latexrecipe function f(x::Ket)
+    env --> :equation
+    cdot --> false
+        # print(io, "\\left|", join(s.name, "; "), "\\right\\rangle")
+        # Print np for n occurances of p in s.name
+        # Vacuum printing
+    return Expr(:call, :*, x.op == one(Operator) ? "" : x.op, "\\left| 0\\right\\rangle")
 end
+Base.show(io::IO, ::MIME"text/latex", x::Ket) = print(io, "\$\$ " * latexify(x) * " \$\$")
+
 
 Base.:(==)(a::Ket, b::Ket) = a.op == b.op
 
