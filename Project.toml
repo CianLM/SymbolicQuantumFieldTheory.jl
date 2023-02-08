@@ -20,7 +20,7 @@ Latexify = "0.15"
 MacroTools = "0.5"
 Revise = "3"
 SymbolicUtils = "0.19"
-Symbolics = "4"
+Symbolics = "4, 5"
 TermInterface = "0.2"
 
 [extras]
