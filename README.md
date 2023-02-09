@@ -27,6 +27,7 @@ a(p)'^2 * a(q)' * vacuum()
 ℋ = E(q) * a(q)' * a(q)
 integrate(ℋ * a(p)', q)
 ```
+which returns $2\pi * E(p) a_p^\dagger \ket{0}$ in a Jupyter notebook and `2π*E(p)a_p^†|0⟩` otherwise.
 
 ## Defining a Custom Commutation Relation
 
@@ -48,6 +49,6 @@ for any `f(p,q)`.
 This defines the commutation relation such that the commutator is now given by
 ```julia
 @syms k l 
-comm(b(k), c(l)') # = f(k,l)
+comm(b(k), c(l)') # returns f(k,l)
 ```
 where Julia has replaced `p` and `q` with `k` and `l` appropriately. Multiple indices are also supported with `@comm [b(p,q), c(r,s)'] = f(p,q,r,s)`.
