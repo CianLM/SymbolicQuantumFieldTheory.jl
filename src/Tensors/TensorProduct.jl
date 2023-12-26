@@ -173,12 +173,12 @@ contracted_indices(x::TensorProduct) = setdiff(vcat(map(x -> x.indices, x.tensor
 function contract_metric(x::TensorProduct)
     free_indices = signature(x)[1]
     for (i,tensor) in enumerate(x.tensors)
-        println("tensor: $tensor, $(tensor_field(tensor)), $(any(ind -> ind ∉ free_indices, tensor.indices)), $(length(tensor.indices) == 2 ? tensor.indices[1].symbol != tensor.indices[2].symbol : tensor.indices )")
+        # println("tensor: $tensor, $(tensor_field(tensor)), $(any(ind -> ind ∉ free_indices, tensor.indices)), $(length(tensor.indices) == 2 ? tensor.indices[1].symbol != tensor.indices[2].symbol : tensor.indices )")
         if tensor_field(tensor) == Metric && any(ind -> ind ∉ free_indices, tensor.indices) && (tensor.indices[1].symbol != tensor.indices[2].symbol)
-            println("here")
+            # println("here")
             # get the index that is contracted
             contracted_index = tensor.indices[findfirst(ind -> ind ∉ free_indices, tensor.indices)]
-            println("contracted index: $contracted_index")
+            # println("contracted index: $contracted_index")
             # tensor.indices has 2 indices in it. One is contracted_index, the other we get with
             other_index = tensor.indices[findfirst(ind -> ind != contracted_index, tensor.indices)]
             # pop the metric tensor from the tensor product

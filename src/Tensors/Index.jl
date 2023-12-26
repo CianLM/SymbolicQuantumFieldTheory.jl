@@ -55,33 +55,33 @@ end
 begin "TermInterface"
 
     function istree(x::Index)
-        println("Is tree called on $x")
+        # println("Is tree called on $x")
         return false
     end
 
     function exprhead(x::Index)
-        println("Exprhead called on $x")
+        # println("Exprhead called on $x")
         return :call
     end
 
     function operation(x::Index)
-        println("operation called on $x")
+        # println("operation called on $x")
         return Index
     end
 
     function arguments(x::Index)
-        println("Arguments called on $x")
+        # println("Arguments called on $x")
         return (x.symbol, x.covariant, x.dim)
         # return x.indices
     end
 
     function metadata(x::Index)
-        println("Metadata called on $x")
+        # println("Metadata called on $x")
         return nothing
     end
 
     function similarterm(t::Index, f, args; exprhead=:call, metadata=nothing)
-        println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
+        # println("similar term called with $f, $args, $symtype, $metadata, $exprhead result: $(t.adjoint ? f(args...)' : f(args...))")
         return f(args...)
     end
 

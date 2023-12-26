@@ -265,7 +265,7 @@ end
 function lower(tensor::Tensor{F}, index::Index) where F <: Field
     # lower the specified index if it exists
     for (i,ind) in enumerate(tensor.indices)
-        println(ind.symbol, index.symbol, ind.symbol == index.symbol)
+    #   println(ind.symbol, index.symbol, ind.symbol == index.symbol)
         if ind.symbol == index.symbol
             indices = copy(tensor.indices)
             indices[i] = Index(index.symbol, true)
@@ -371,7 +371,7 @@ function relabel(μ::Symbol, ν::Symbol, x::Tensor)
     desired_index(index::Index) = index.symbol == μ
     rule = @rule ~index::desired_index => Index(ν, index.covariant; dim=index.dim)
     new_indices = Metatheory.PassThrough(rule).(arguments(x))
-    println(new_indices)
+    # println(new_indices)
     return similarterm(x, operation(x), new_indices)
 end
 

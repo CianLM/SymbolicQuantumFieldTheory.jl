@@ -12,7 +12,7 @@ struct UnevaluatedIntegral <: OperatorSym
     end
 
     function UnevaluatedIntegral(integrand::Union{OperatorTerm,SymbolicUtils.Symbolic}, variable::SymbolicUtils.Sym{Number})
-        println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
+        # println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
         new(OperatorTerm(normalorder(integrand)), variable)
     end
 
@@ -32,7 +32,7 @@ struct UnevaluatedIntegral <: OperatorSym
     end
 
     function UnevaluatedIntegral(integrand::KetState, variable::SymbolicUtils.Sym{Number})
-        println("UE constructed w $(typeof(integrand)): $integrand")
+        # println("UE constructed w $(typeof(integrand)): $integrand")
         dict = Dict{Ket,SymorNum}()
         for (k,v) in integrand.states
                 dict[k] = get(dict, k, 0) + UnevaluatedIntegral(v * k.op, variable)
@@ -43,7 +43,7 @@ end
 # :normal, :default, :bold, :black, :blink, :blue, :cyan, :green, :hidden, :light_black, :light_blue, :light_cyan, :light_green, :light_magenta, :light_red, :light_yellow, :magenta, :nothing, :red, :reverse, :underline, :white, or :yellow
 
 function Base.show(io::IO, integral::UnevaluatedIntegral)
-    print(io, "∫d$(integral.variable) ($(integral.integrand)) ")
+    show(io, "∫d$(integral.variable) ($(integral.integrand)) ")
 end
 
 @latexrecipe function f(x::UnevaluatedIntegral)
@@ -116,7 +116,7 @@ end
 
 function integrate(integrand::KetState, k::SymbolicUtils.Sym)
     pieces = [integrate(val * key.op, k) * vacuum() for (key, val) in integrand.states]
-    println(join(pieces, "\n"))
+    # println(join(pieces, "\n"))
     return sum(pieces)
 end
 
@@ -146,7 +146,7 @@ end
 function *(a::UnevaluatedIntegral, b::Ket)
     integrand = 0
     for (key, value) in a.integrand.terms
-        println(value * key * b)
+        # println(value * key * b)
         integrand += value * key * b
     end
     # printstyled(integrand, "\n", color=:light_magenta)
