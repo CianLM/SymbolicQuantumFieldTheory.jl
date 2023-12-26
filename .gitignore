@@ -3,3 +3,4 @@
 .githooks
 .ipynb_checkpoints
 test.jl
+src/Diagrams

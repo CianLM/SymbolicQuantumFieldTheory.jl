@@ -53,7 +53,6 @@ include("BraKets/Bra.jl")
 include("BraKets/Ket.jl")
 include("BraKets/KetState.jl")
 include("BraKets/BraState.jl")
-include("BraKets/Adjoints.jl")
 
 export comm, normalorder, symbolorder, isnormalordered
 include("Interactions/Commutators.jl")
@@ -64,6 +63,27 @@ include("Interactions/InnerProducts.jl")
 export integrate
 include("Integrals/IntegrationRules.jl")
 include("Integrals/Integral.jl")
+
+include("BraKets/Adjoints.jl")
+
+using Revise
+using Metatheory
+using Latexify
+import Base: hash, reverse, iterate, firstindex, getindex, setindex!, lastindex
+import Base:  one, convert, length, *, +, -, /, ^
+import SymbolicUtils
+SymorNum = Union{SymbolicUtils.Symbolic,Number}
+
+export Index, Tensor, TensorProduct, TensorSum
+export @DefineTensor, @Index, @Indices, @Tensor, @Tensors
+export raise, lower, raiseAll, lowerAll, contract_metric, relabel
+export g, ∂, Derivative, MetricTensor
+include("Tensors/Index.jl")
+include("Tensors/AbstractTensor.jl")
+include("Tensors/Tensor.jl")
+include("Tensors/TensorProduct.jl")
+include("Tensors/TensorSum.jl")
+1
 
 
 # testing
@@ -76,4 +96,10 @@ include("Integrals/Integral.jl")
 
 # comm(f(a)' * f(b), f(b)' * f(a))
 # normalorder(t)
+
+# Define latexify for the exp function
+
+
+
+ISSUE_LINK = "https://github.com/CianLM/SymbolicQuantumFieldTheory.jl/issues/new"
 end

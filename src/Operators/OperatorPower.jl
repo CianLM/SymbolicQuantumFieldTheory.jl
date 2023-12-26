@@ -45,7 +45,7 @@ begin "TermInterface"
 
 end
 function Base.show(io::IO, s::OperatorPower)
-    print(io, "$(s.operator)^$(s.power)")
+    print(io, "($(s.operator))^$(s.power)")
 end
 
 @latexrecipe function f(x::OperatorPower)

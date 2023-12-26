@@ -225,10 +225,10 @@ function *(a::OperatorTerm, b::OperatorTerm)
 end
 
 function Base.hash(a::OperatorTerm, h::UInt=UInt(0))
-    h = hash(length(a), h)
+    h = Base.hash(length(a), h)
     for (x, y) in a.terms
-        h = hash(x, h)
-        h = hash(y, h)
+        h = Base.hash(x, h)
+        h = Base.hash(y, h)
     end
     return h
 end

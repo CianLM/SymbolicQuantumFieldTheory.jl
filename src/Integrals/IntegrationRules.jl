@@ -1,16 +1,17 @@
+# ! FIX: This necessitates p be included
 @syms p q
-is_integration_variable(x::typeof(p)) = p - x isa Number && p - x == 0
-is_integration_variable(x) = false
-@syms a b c d
-@syms x y z
-k_equals(k::typeof(p),x::SymbolicUtils.Symbolic) = Symbolics.solve_for(x ~ 0,k)
-r = @rule δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
-r_c = @rule ~~b*δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
-r_lrc = @rule ~~a + ~~b*δ(~~x + ~y::is_integration_variable + ~~z) + ~~c => +(~~x...,~y, ~~z...)
+# is_integration_variable(x::typeof(p)) = p - x isa Number && p - x == 0
+# is_integration_variable(x) = false
+# @syms a b c d
+# @syms x y z
+# k_equals(k::typeof(p),x::SymbolicUtils.Symbolic) = Symbolics.solve_for(x ~ 0,k)
+# r = @rule δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
+# r_c = @rule ~~b*δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
+# r_lrc = @rule ~~a + ~~b*δ(~~x + ~y::is_integration_variable + ~~z) + ~~c => +(~~x...,~y, ~~z...)
 
-rm = @rule δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
-rm_c = @rule ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
-rm_lrc = @rule ~~a + ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) + ~~c => +(~~x...,w*~y, ~~z...)
+# rm = @rule δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
+# rm_c = @rule ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
+# rm_lrc = @rule ~~a + ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) + ~~c => +(~~x...,w*~y, ~~z...)
 
 ################
 # r = @rule δ(~~x + ~y::is_integration_variable + ~~z) => k_equals(~y,+(~~x...,~y, ~~z...))

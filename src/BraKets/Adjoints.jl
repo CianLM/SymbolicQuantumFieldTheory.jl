@@ -16,3 +16,6 @@ end
 
 adjoint(x::SymbolicUtils.Symbolic) = conj(x)
 conj(x::SymbolicUtils.Symbolic) = x # ! Temporary 
+
+adjoint(x::SymbolicUtils.Term) = operation(x) == exp ? exp(-arguments(x)...) : error("Adjoint of $x undefined.")
+adjoint(x::UnevaluatedIntegral) = UnevaluatedIntegral(x.integrand', x.variable)

@@ -1,20 +1,18 @@
 @operator ScalarField a
 v = vacuum()
 struct UnevaluatedIntegral <: OperatorSym
-    # This struct represents a symbolic integral defining an important quantity.
-    # E.g. the Hamiltonian, the Lagrangian, the energy, etc.
-    # The integral is defined by an integrand and a variable to be integrated over.
+    # This struct represents a symbolic integral
     # The integrand is a function of the variable, and we assume infinite bounds always.
     integrand::OperatorTerm
     variable::SymbolicUtils.Sym
 
     function UnevaluatedIntegral(integrand::Number, variable::SymbolicUtils.Sym{Number})
         # println("UE Constructed w $(typeof(integrand))")
-        return integrand == 0 ? 0 : new(OperatorTerm(normalorder(integrand)), variable)
+        return integrand == 0 ? 0 : new(OperatorTerm(integrand), variable)
     end
 
     function UnevaluatedIntegral(integrand::Union{OperatorTerm,SymbolicUtils.Symbolic}, variable::SymbolicUtils.Sym{Number})
-        # println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
+        println("UE Constructed w $(typeof(integrand)): $(new(OperatorTerm(normalorder(integrand)), variable))")
         new(OperatorTerm(normalorder(integrand)), variable)
     end
 
@@ -34,7 +32,7 @@ struct UnevaluatedIntegral <: OperatorSym
     end
 
     function UnevaluatedIntegral(integrand::KetState, variable::SymbolicUtils.Sym{Number})
-        # println("UE constructed w $(typeof(integrand))")
+        println("UE constructed w $(typeof(integrand)): $integrand")
         dict = Dict{Ket,SymorNum}()
         for (k,v) in integrand.states
                 dict[k] = get(dict, k, 0) + UnevaluatedIntegral(v * k.op, variable)
@@ -43,23 +41,19 @@ struct UnevaluatedIntegral <: OperatorSym
     end
 end
 # :normal, :default, :bold, :black, :blink, :blue, :cyan, :green, :hidden, :light_black, :light_blue, :light_cyan, :light_green, :light_magenta, :light_red, :light_yellow, :magenta, :nothing, :red, :reverse, :underline, :white, or :yellow
-function _KetState(int::UnevaluatedIntegral) 
-    integrand = 0
-    for (key, value) in int.integrand.terms
-        integrand += value * key * vacuum()
-    end
-    # printstyled(integrand, "\n", color=:light_magenta)
-    integrand == 0 && return 0
-    return UnevaluatedIntegral(sum( v * k.op for (k,v) in integrand.states), int.variable)
-end
 
 function Base.show(io::IO, integral::UnevaluatedIntegral)
     print(io, "∫d$(integral.variable) ($(integral.integrand)) ")
 end
-# ipynb printing using latex
-function Base.show(io::IO, ::MIME"text/latex", integral::UnevaluatedIntegral)
-    print(io, "\\int \\mathrm{d}$(integral.variable) \\left($(integral.integrand)\\right)")
+
+@latexrecipe function f(x::UnevaluatedIntegral)
+    env --> :equation
+    cdot --> false
+    return Expr(:call, :*, "\\int", "\\mathrm{d}$(x.variable)", "\\left($(x.integrand)\\right)")
 end
+
+# ipynb printing using latex
+Base.show(io::IO, ::MIME"text/latex", integral::UnevaluatedIntegral) = print(io, "\$\$ " * latexify(integral) * " \$\$")
 
 
 function integrate(ks::KetState)
@@ -69,8 +63,21 @@ function integrate(ui::UnevaluatedIntegral)
     return integrate(ui.integrand, ui.variable)
 end
 
+function integrate(integrand::SymorNum, k::SymbolicUtils.Sym)
+    return integrate(OperatorTerm(integrand), k)
+end
+
 function integrate(integrand::OperatorTerm, k::SymbolicUtils.Sym)
     no_int = normalorder(integrand)
+    is_integration_variable(x::SymbolicUtils.Sym) = k - x isa Number && k - x == 0
+    is_integration_variable(x) = false
+    r = @rule δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
+    r_c = @rule ~~b*δ(~~x + ~y::is_integration_variable + ~~z) => +(~~x...,~y, ~~z...)
+    r_lrc = @rule ~~a + ~~b*δ(~~x + ~y::is_integration_variable + ~~z) + ~~c => +(~~x...,~y, ~~z...)
+    rm = @rule δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
+    rm_c = @rule ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) => +(~~x...,w*~y, ~~z...)
+    rm_lrc = @rule ~~a + ~~b*δ(~~x + ~w*~y::is_integration_variable + ~~z) + ~~c => +(~~x...,w*~y, ~~z...)
+
     # println(no_int)
     integrated = 0
     for (term, coeff) in no_int.terms
@@ -78,21 +85,21 @@ function integrate(integrand::OperatorTerm, k::SymbolicUtils.Sym)
         # Search for δ(p ± k) in coeff
         params = SymbolicUtils.Chain([r,r_c,r_lrc,rm,rm_c,rm_lrc])(coeff)
         # print comma separated coeff, params, Term
-        # printstyled("Coeff: $coeff, Params: $params, Term: $term \n", color=:grey)
+        printstyled("Coeff: $coeff, Params: $params, Term: $term \n", color=:grey)
 
         if params !== coeff #i.e. a match has been found
-            # printstyled("Found $params deps $k in $coeff \n", color=:green)
+            printstyled("Found $params deps $k in $coeff \n", color=:green)
             k_replacement = Symbolics.solve_for(params ~ 0, k)
-            # printstyled("Replacing $k with $k_replacement \n", color=:green)
+            printstyled("Replacing $k with $k_replacement \n", color=:green)
             integrated_coeff = substitute(coeff, Dict(
                 δ(params) => 1,
                 k => k_replacement
             ))
             subbed_term = substitute(term, Dict(k => k_replacement))
-            # printstyled("Final term is $subbed_term \n", color=:green)
+            printstyled("Final term is $subbed_term \n", color=:green)
             integrated += integrated_coeff * subbed_term
         else
-            # printstyled("No match found in $coeff: Adding $(UnevaluatedIntegral(coeff * term, k))\n", color=:red)
+            printstyled("No match found in $coeff: Adding $(UnevaluatedIntegral(coeff * term, k))\n", color=:red)
             integrated += UnevaluatedIntegral(coeff * term, k)
         end
     end
@@ -108,7 +115,9 @@ function integrate(integrand::Ket, k::SymbolicUtils.Sym)
 end
 
 function integrate(integrand::KetState, k::SymbolicUtils.Sym)
-    return sum([integrate(val * key.op, k) * vacuum() for (key,val) in integrand.states])
+    pieces = [integrate(val * key.op, k) * vacuum() for (key, val) in integrand.states]
+    println(join(pieces, "\n"))
+    return sum(pieces)
 end
 
 function integrate(integrand::Bra, k::SymbolicUtils.Sym)
@@ -135,14 +144,21 @@ end
 
 # Make vanishing operator applications vanish
 function *(a::UnevaluatedIntegral, b::Ket)
-    # printstyled(a.integrand * b.op, "\n", color=:blue)
-    return _KetState(UnevaluatedIntegral(a.integrand * b.op, a.variable))
+    integrand = 0
+    for (key, value) in a.integrand.terms
+        println(value * key * b)
+        integrand += value * key * b
+    end
+    # printstyled(integrand, "\n", color=:light_magenta)
+    integrand == 0 && return 0
+return error("Integral does not converge or cannot be evaluated. Please submit an issue if you think this is a bug:\n$ISSUE_LINK")
+
 end
 # @which UnevaluatedIntegral(a_p * a_q',q) * v
 # integrate(UnevaluatedIntegral(a_p * a_q',q) * v)
 
 
-*(a::Bra, b::UnevaluatedIntegral) =Bra(UnevaluatedIntegral(a.op * b.integrand, b.variable))
+*(a::Bra, b::UnevaluatedIntegral) = Bra(UnevaluatedIntegral(a.op * b.integrand, b.variable))
 
 *(a::UnevaluatedIntegral, b::SymorNum) = UnevaluatedIntegral(a.integrand * b, a.variable)
 *(a::SymorNum, b::UnevaluatedIntegral) = UnevaluatedIntegral(a * b.integrand, b.variable)
@@ -162,6 +178,8 @@ end
 
 normalorder(a::UnevaluatedIntegral) = UnevaluatedIntegral(normalorder(a.integrand),a.variable)
 
+
+*(a::UnevaluatedIntegral, b::UnevaluatedIntegral) = OperatorProduct([a, b])
 
 # UnevaluatedIntegral(0,q)
 # UnevaluatedIntegral(5,q)

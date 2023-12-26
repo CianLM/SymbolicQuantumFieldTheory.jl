@@ -73,7 +73,7 @@ macro comm(ex)
                 return 0
             elseif u1.adjoint == esc_a.adjoint && u2.adjoint == esc_b.adjoint || u1.adjoint == esc_b.adjoint && u2.adjoint == esc_a.adjoint
                 cc = substitute($(esc(c)), Dict(zip(esc_a.indices, u1.indices)) ∪ Dict(zip(esc_b.indices, u2.indices)))
-                # Parity fixing ± the specified commutation due to antisymmetry of the Lie bracket
+                # Parity fixing ± the specified commutation due to antisymmetry of the commutator
                 return (-1)^(Int(u1.adjoint == esc_b.adjoint) + Int(u1.name == esc_b.name)) * cc
             else
                 return 0
